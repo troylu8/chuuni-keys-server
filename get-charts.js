@@ -9,17 +9,18 @@ class ChartCard extends HTMLElement {
     }
     
     connectedCallback() {
-        const div = document.createElement("div");
-        
         const titleElem = document.createElement("h3");
         titleElem.textContent = this.getAttribute("title");
-        div.appendChild(titleElem);
+        this.appendChild(titleElem);
         
         const creditAudioElem = document.createElement("p");
         creditAudioElem.textContent = this.getAttribute("credit_audio");
-        div.appendChild(creditAudioElem);
+        this.appendChild(creditAudioElem);
         
-        this.appendChild(div);
+        const playButton = document.createElement("a");
+        playButton.href = "chuuni://play/" + this.getAttribute("chart-id");
+        playButton.textContent = "play";
+        this.appendChild(playButton);
     }
 }
 customElements.define("chart-card", ChartCard);
@@ -37,7 +38,8 @@ customElements.define("chart-card", ChartCard);
     
     for (const [id, title] of visibleCharts) {
         const chartCard = document.createElement("chart-card");
-        chartCard.setAttribute("title", title)
+        chartCard.setAttribute("chart-id", id);
+        chartCard.setAttribute("title", title);
         mainElem.appendChild(chartCard);
     }
     
