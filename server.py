@@ -93,7 +93,7 @@ def get_charts(page: int):
 @app.post("/charts")
 def upload_chart():
     
-    metadata = json.load(request.files["metadata"].stream)
+    metadata = json.loads(request.form["metadata"])
     owner_hash = request.form["owner_hash"];
     
     online_id = gen_id()
@@ -123,7 +123,7 @@ def update_chart(id: str):
         old_img_ext, owner_hash = old_data
         
         if bcrypt.checkpw(owner_key, owner_hash.encode()):
-            metadata: dict = json.load(request.files["metadata"].stream)
+            metadata: dict = json.loads(request.form["metadata"])
             placeholder, new_row_data = create_db_row(id, metadata, owner_hash)
             cursor.execute(f"REPLACE INTO charts VALUES ({placeholder})", new_row_data)
         else:
