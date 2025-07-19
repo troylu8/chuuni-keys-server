@@ -78,7 +78,7 @@ PAGE_SIZE = 50
 
 @app.get("/charts/<int:page>")
 def get_charts(page: int):
-    with sqlite3.connect("data/chuuni.db") as conn:
+    with sqlite3.connect(f"{__file__}/../data/chuuni.db") as conn:
         cursor = conn.cursor()
         
         count = cursor.execute("SELECT COUNT(*) FROM charts").fetchone()[0]

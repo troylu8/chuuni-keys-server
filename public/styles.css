@@ -6,12 +6,19 @@
 :root {
     --base: #1e1e2e;
     --text: #cdd6f4;
+    --mauve: #cba6f7;
+    --red: #f38ba8;
+    --blue: #89b4fa;
 }
 
-.eb-garamond {
-    font-family: "EB Garamond", serif;
-    font-optical-sizing: auto;
-    font-style: normal;
+@font-face {
+    font-family: "Signika";
+    src: url("fonts/Signika-Light.woff2");
+}
+
+@font-face {
+    src: url("fonts/EBGaramond-Regular.woff2");
+    font-family: "EB Garamond";
 }
 
 body {
@@ -26,6 +33,107 @@ chart-card {
     border-radius: 4px;
 }
 
+h1 {
+    font-family: "EB Garamond", serif;
+    font-size: 60px;
+    letter-spacing: 0.05em;
+    font-weight: 400;
+}
+
+#header-chuuni {
+    color: var(--mauve);
+}
+#header-keys {
+    color: var(--red);
+}
+#header-chart-listing {
+    color: var(--blue);
+    font-size: 32px;
+    letter-spacing: normal;
+
+    font-family: "Signika", sans-serif;
+}
+
 main {
-    width: 500px;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 12px;
+}
+
+#loading-spinner {
+    animation: anim-loading 1.5s ease-in-out infinite;
+    margin: auto;
+}
+@keyframes anim-loading {
+    0% {
+        rotate: 0;
+    }
+    25% {
+        rotate: 90deg;
+    }
+    50% {
+        rotate: 180deg;
+    }
+    75% {
+        rotate: 270deg;
+    }
+    100% {
+        rotate: 360deg;
+    }
+}
+
+#charts-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+
+#chart-count {
+    font-family: monospace;
+}
+
+listing-error {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    padding: 12px;
+    border-radius: 8px;
+    outline: solid 2px var(--red);
+    color: var(--red);
+    gap: 8px;
+    font-family: monospace;
+}
+listing-error > header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: large;
+}
+listing-error > header::before {
+    content: url("alert.svg");
+}
+
+#top-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 8px;
+}
+
+#top-nav > a {
+    color: var(--mauve);
+    cursor: pointer;
+    font-family: monospace;
+}
+
+#top-nav > a:hover {
+    /* color: var(--blue); */
+    font-style: italic;
+}
+
+#top-nav > a:not(.top-nav-active) {
+    text-decoration: none;
+}
+.top-nav-active {
+    text-decoration: underline;
 }

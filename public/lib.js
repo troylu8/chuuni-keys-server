@@ -23,9 +23,9 @@ export function elem(tag, options) {
     if (!options) return elem;
     
     const { id, cls, text, attrs, parent } = options;
-    elem.id = id;
-    elem.className = cls;
-    elem.textContent = text;
+    if (id) elem.id = id;
+    if (cls) elem.className = cls;
+    if (text) elem.textContent = text;
     if (attrs) {
         for (const [attr, val] of attrs) {
             elem.setAttribute(attr, val);
