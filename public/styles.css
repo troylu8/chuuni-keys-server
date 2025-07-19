@@ -1,0 +1,31 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root {
+    --base: #1e1e2e;
+    --text: #cdd6f4;
+}
+
+.eb-garamond {
+    font-family: "EB Garamond", serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+body {
+    background-color: var(--base);
+    color: var(--text);
+    font-family: "Signika", sans-serif;
+}
+
+chart-card {
+    display: block;
+    outline: solid 2px black;
+    border-radius: 4px;
+}
+
+main {
+    width: 500px;
+}
