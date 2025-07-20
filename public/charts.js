@@ -4,19 +4,29 @@ const SERVER_URL = "http://localhost:5000";
 const CHARTS_PER_PAGE = 50;
 
 class ChartCard extends HTMLElement {
-    static observedAttributes = ["title", "credit_audio"]
-    
     connectedCallback() {
-        elem("h3", { text: this.getAttribute("title"), parent: this });
-        
-        elem("p", {
-            text: this.getAttribute("credit_audio"), 
+        elem("img", {
+            attrs: [
+                ["src", 
+                    this.hasAttribute("img-ext") ? 
+                        `${SERVER_URL}/static/${this.getAttribute("online-id")}/img.${this.getAttribute("img-ext")}`:
+                        "public/default-bg.png"
+                ]
+            ],
             parent: this
         });
         
-        elem("a", { 
+        elem("h3", { text: this.getAttribute("title"), parent: this });
+        
+        elem("p", {
+            text: this.getAttribute("credit-audio"), 
+            parent: this
+        });
+        
+        elem("a", {
             text: "play", 
-            attrs: [["href", "chuuni://play/" + this.getAttribute("chart-id")]],
+            cls: "play-button",
+            attrs: [["href", "chuuni://play/" + this.getAttribute("online-id")]],
             parent: this,
         });
     }
@@ -24,8 +34,6 @@ class ChartCard extends HTMLElement {
 customElements.define("chart-card", ChartCard);
 
 class ListingError extends HTMLElement {
-    static observedAttributes = ["reason"]
-    
     connectedCallback() {
         elem("header", { text: "Error getting charts", parent: this });
         elem("p", { text: this.getAttribute("reason"), parent: this });
@@ -46,16 +54,23 @@ customElements.define("listing-error", ListingError);
         
         const [count, visibleCharts] = await chartsResp.json();
         
-        // add chart count display
-        elem("p", {
-            id: "chart-count",
-            text: count + " total charts",
-            parent: chartsList.parentElement
-        });
+        // update chart count display
+        document.getElementById("chart-count").textContent = count + " total charts";
         
-        for (const [id, title] of visibleCharts) {
+        for (const [id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart] of visibleCharts) {
+            console.log([id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart]);
             elem("chart-card", {
-                attrs: [["chart-id", id], ["title", title]],
+                attrs: [
+                    ["online-id", id], 
+                    ["title", title],
+                    ["difficulty", difficulty],
+                    ["bpm", bpm],
+                    ["audio-ext", audio_ext],
+                    ["img-ext", img_ext],
+                    ["credit-audio", credit_audio],
+                    ["credit-img", credit_img],
+                    ["credit-chart", credit_chart],
+                ],
                 parent: chartsList,
             })
         }
@@ -68,6 +83,5 @@ customElements.define("listing-error", ListingError);
     }
     
     document.getElementById("loading-spinner").remove();
-    document.getElementById("charts-count").style.display = "block";
     
 })();

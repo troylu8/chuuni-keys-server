@@ -9,6 +9,7 @@
     --mauve: #cba6f7;
     --red: #f38ba8;
     --blue: #89b4fa;
+    --green: #a6e3a1;
 }
 
 @font-face {
@@ -27,10 +28,9 @@ body {
     font-family: "Signika", sans-serif;
 }
 
-chart-card {
-    display: block;
-    outline: solid 2px black;
-    border-radius: 4px;
+button:hover,
+a:hover {
+    filter: brightness(135%);
 }
 
 h1 {
@@ -136,4 +136,30 @@ listing-error > header::before {
 }
 .top-nav-active {
     text-decoration: underline;
+}
+
+chart-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #313244;
+
+    display: flex;
+}
+
+.play-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--green);
+    color: var(--base);
+    padding: 2px 12px;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+    font-size: small;
+    text-decoration: none;
+}
+
+chart-card > img {
+    width: 240px;
+    height: 135px;
+    object-fit: cover;
 }

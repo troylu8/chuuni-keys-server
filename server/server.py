@@ -24,6 +24,7 @@ def create_db_row(id: str, metadata: dict, owner_hash: str):
     
     data = (
         id,
+        owner_hash,
         metadata["title"],
         metadata["difficulty"],
         metadata["bpm"],
@@ -36,23 +37,32 @@ def create_db_row(id: str, metadata: dict, owner_hash: str):
         metadata.get("credit_audio"),
         metadata.get("credit_img"),
         metadata.get("credit_chart"),
-        owner_hash
     )
     return ( ','.join( ['?'] * len(data) ) , data)
 
 def to_metadata(row: sqlite3.Row):
+    
+    def get_or_default(row: sqlite3.Row, field: str, default):
+        try:
+            return row[field]
+        except IndexError:
+            return default
+    
     return {
         "online_id": row["id"],
+        "owner_hash": row["owner_hash"],
         "title": row["title"],
         "difficulty": row["difficulty"],
         "bpm": row["bpm"],
+        "first_beat": row["first_beat"],
+        "preview_time": row["preview_time"],
         "measure_size": row["measure_size"],
         "snaps": row["snaps"],
         "audio_ext": row["audio_ext"],
-        "img_ext": getattr(row, "img_ext", None),
-        "credit_audio": getattr(row, "credit_audio", None),
-        "credit_img": getattr(row, "credit_img", None),
-        "credit_chart": getattr(row, "credit_chart", None)
+        "img_ext": get_or_default(row, "img_ext", None),
+        "credit_audio": get_or_default(row, "credit_audio", None),
+        "credit_img": get_or_default(row, "credit_img", None),
+        "credit_chart": get_or_default(row, "credit_chart", None)
     }
 
 
@@ -60,7 +70,7 @@ VALID_AUDIO_EXTS = "mp3", "wav", "aac", "ogg", "webm"
 VALID_IMG_EXTS = "png", "jpg", "bmp", "webp", "avif"
 
 def save_uploaded_files(id: str, exts: dict[str, str]):
-    chart_folder = f"data/charts/{id}"
+    chart_folder = f"static/charts/{id}"
     os.makedirs(chart_folder, exist_ok=True)
     
     if "chart" in request.files:
@@ -78,13 +88,13 @@ PAGE_SIZE = 50
 
 @app.get("/charts/<int:page>")
 def get_charts(page: int):
-    with sqlite3.connect(f"{__file__}/../data/chuuni.db") as conn:
+    with sqlite3.connect("chuuni.db") as conn:
         cursor = conn.cursor()
         
         count = cursor.execute("SELECT COUNT(*) FROM charts").fetchone()[0]
         
         charts = cursor.execute(
-            "SELECT id, title, bpm FROM charts LIMIT ? OFFSET ?", 
+            "SELECT id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart FROM charts LIMIT ? OFFSET ?", 
             (PAGE_SIZE, PAGE_SIZE * page)
         ).fetchall()
         
@@ -102,7 +112,7 @@ def upload_chart():
     
     # insert sqlite3 row
     placeholder, row_data = create_db_row(online_id, metadata, owner_hash)
-    with sqlite3.connect("data/chuuni.db") as conn:
+    with sqlite3.connect("chuuni.db") as conn:
         conn.cursor().execute(f"INSERT INTO charts VALUES ({placeholder})", row_data)
     
     return online_id
@@ -113,7 +123,7 @@ def update_chart(id: str):
     owner_key = request.form["owner_key"].encode();
     
     # update sqlite3 row
-    with sqlite3.connect("data/chuuni.db") as conn:
+    with sqlite3.connect("chuuni.db") as conn:
         cursor = conn.cursor()
         
         old_data = cursor.execute("SELECT img_ext, owner_hash FROM charts WHERE id=?", (id,)).fetchone()
@@ -133,7 +143,7 @@ def update_chart(id: str):
     
     # delete old image if it wasnt overwritten
     if old_img_ext is not None and old_img_ext != metadata.get("img_ext"):
-        os.remove(f"data/charts/{id}/img.{old_img_ext}")
+        os.remove(f"static/charts/{id}/img.{old_img_ext}")
     
     return Response(status=200)
 
@@ -143,7 +153,7 @@ def delete_chart(id: str):
     owner_key = request.data
     
     # delete sqlite3 row
-    with sqlite3.connect("data/chuuni.db") as conn:
+    with sqlite3.connect("chuuni.db") as conn:
         cursor = conn.cursor()
         
         row = cursor.execute("SELECT owner_hash FROM charts WHERE id=?", (id,)).fetchone()
@@ -156,7 +166,7 @@ def delete_chart(id: str):
             return Response(status=401)
     
     # delete chart folder
-    shutil.rmtree(f"data/charts/{id}")
+    shutil.rmtree(f"static/charts/{id}")
     
     return Response(status=200)
 
@@ -164,7 +174,7 @@ def delete_chart(id: str):
 def download_chart(id: str):
     
     # get metadata from sqlite3 row
-    with sqlite3.connect("data/chuuni.db") as conn:
+    with sqlite3.connect("chuuni.db") as conn:
         conn.row_factory = sqlite3.Row
         
         row = conn.cursor().execute("SELECT * FROM charts WHERE id=?", (id,)).fetchone()
@@ -173,7 +183,7 @@ def download_chart(id: str):
     
     # zip chart folder
     zip_buffer = io.BytesIO()
-    chart_folder = f"data/charts/{id}"
+    chart_folder = f"static/charts/{id}"
     with ZipFile(zip_buffer, mode="w") as zip:
         zip.writestr("metadata.json", json.dumps(to_metadata(row)))
         zip.write(f"{chart_folder}/chart.txt", "chart.txt")
@@ -182,7 +192,7 @@ def download_chart(id: str):
             zip.write(f"{chart_folder}/img.{row['img_ext']}", f"img.{row['img_ext']}")
     
     return zip_buffer.getvalue()
-    
+
 
 if __name__ == "__main__":
     app.run(debug=True)
