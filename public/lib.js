@@ -28,7 +28,8 @@ export function elem(tag, options) {
     if (text) elem.textContent = text;
     if (attrs) {
         for (const [attr, val] of attrs) {
-            elem.setAttribute(attr, val);
+            if (val !== null && val !== undefined)
+                elem.setAttribute(attr, val);
         }
     }
     if (parent) parent.appendChild(elem);

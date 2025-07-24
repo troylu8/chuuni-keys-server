@@ -29,6 +29,18 @@ body {
     font-family: "Signika", sans-serif;
 }
 
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 99999px;
+    background: var(--mauve);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--lavender);
+}
+
 button:hover,
 a:hover {
     filter: brightness(135%);
@@ -142,9 +154,7 @@ listing-error > header::before {
 }
 
 chart-card {
-    border-radius: 12px;
     position: relative;
-    display: flex;
     width: 100%;
 }
 
@@ -251,7 +261,8 @@ chart-entry {
 
 .entry-credits {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 0 12px;
 }
 
 .entry-credits > span {

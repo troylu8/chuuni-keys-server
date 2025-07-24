@@ -31,7 +31,7 @@ class ChartCard extends HTMLElement {
         const creditAudio = this.getAttribute("credit-audio");
         const creditImg = this.getAttribute("credit-img");
         const creditChart = this.getAttribute("credit-chart");
-        
+        console.log(creditImg);
         this.innerHTML = `
             <div class="entry-diamond">
                 <div class="entry-img-cont">
