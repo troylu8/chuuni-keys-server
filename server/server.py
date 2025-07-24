@@ -67,20 +67,23 @@ def to_metadata(row: sqlite3.Row):
 
 
 VALID_AUDIO_EXTS = "mp3", "wav", "aac", "ogg", "webm"
-VALID_IMG_EXTS = "png", "jpg", "bmp", "webp", "avif"
+VALID_IMG_EXTS = "png", "jpg", "bmp", "webp", "avif", "jpeg"
 
-def save_uploaded_files(id: str, exts: dict[str, str]):
+def save_uploaded_files(id: str, metadata: dict[str, str]):
     chart_folder = f"static/charts/{id}"
     os.makedirs(chart_folder, exist_ok=True)
     
     if "chart" in request.files:
         request.files["chart"].save(f"{chart_folder}/chart.txt")
     
-    if "audio" in request.files and exts["audio_ext"] in VALID_AUDIO_EXTS:
-        request.files["audio"].save(f"{chart_folder}/audio.{exts["audio_ext"]}")
+    if "audio" in request.files and metadata["audio_ext"] in VALID_AUDIO_EXTS:
+        request.files["audio"].save(f"{chart_folder}/audio.{metadata["audio_ext"]}")
+        
+        # use ffmpeg to create 10 second preview clip
+        os.system(f"ffmpeg -i {chart_folder}/audio.{metadata["audio_ext"]} -ss {float(metadata["preview_time"]) / 1000} -t 10  {chart_folder}/preview.mp3")
     
-    if "img" in request.files and exts["img_ext"] in VALID_IMG_EXTS:
-        request.files["img"].save(f"{chart_folder}/img.{exts["img_ext"]}")
+    if "img" in request.files and metadata["img_ext"] in VALID_IMG_EXTS:
+        request.files["img"].save(f"{chart_folder}/img.{metadata["img_ext"]}")
 
 
 PAGE_SIZE = 50
@@ -94,7 +97,7 @@ def get_charts(page: int):
         count = cursor.execute("SELECT COUNT(*) FROM charts").fetchone()[0]
         
         charts = cursor.execute(
-            "SELECT id, title, difficulty, bpm, preview_time, audio_ext, img_ext, credit_audio, credit_img, credit_chart FROM charts LIMIT ? OFFSET ?", 
+            "SELECT id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart FROM charts LIMIT ? OFFSET ?", 
             (PAGE_SIZE, PAGE_SIZE * page)
         ).fetchall()
         

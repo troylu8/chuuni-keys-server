@@ -6,12 +6,17 @@ const CHARTS_PER_PAGE = 50;
 const audio = new Audio();
 let lastPlayingChartId = null;
 
-function resetCurrListenBtn() {
-    if (lastPlayingChartId) {
-        const currListenBtn = document.getElementById(lastPlayingChartId + "-listen-btn");
-        currListenBtn.classList.replace("listen-btn-playing", "listen-btn-paused");
-        currListenBtn.textContent = "listen";
-    }
+function activateListenBtn(btn) {
+    btn.classList.replace("listen-btn-paused", "listen-btn-playing");
+    btn.textContent = "pause";
+}
+function resetListenBtn(btn) {
+    btn.classList.replace("listen-btn-playing", "listen-btn-paused");
+    btn.textContent = "listen";
+}
+function resetLastListenBtn() {
+    if (lastPlayingChartId)
+        resetListenBtn(document.getElementById(lastPlayingChartId + "-listen-btn"));
 }
 
 class ChartCard extends HTMLElement {
@@ -31,7 +36,7 @@ class ChartCard extends HTMLElement {
         const creditAudio = this.getAttribute("credit-audio");
         const creditImg = this.getAttribute("credit-img");
         const creditChart = this.getAttribute("credit-chart");
-        console.log(creditImg);
+        
         this.innerHTML = `
             <div class="entry-diamond">
                 <div class="entry-img-cont">
@@ -60,27 +65,30 @@ class ChartCard extends HTMLElement {
         
         const listenBtn = elem("button", { parent: buttonsCont, text: "listen", cls: "listen-btn-paused", id: onlineId + "-listen-btn" });
         listenBtn.addEventListener("click", () => {
-            resetCurrListenBtn();
-            
-            if (audio.paused) {
-                listenBtn.classList.replace("listen-btn-paused", "listen-btn-playing");
-                listenBtn.textContent = "pause";
-                
-                if (lastPlayingChartId != onlineId) {
-                    audio.src = `${SERVER_URL}/static/charts/${onlineId}/audio.${this.getAttribute("audio-ext")}`;
-                    lastPlayingChartId = onlineId;
+            if (lastPlayingChartId == onlineId) {
+                if (audio.paused) {
+                    audio.play();
+                    activateListenBtn(listenBtn);
                 }
-                
-                audio.play();
+                else {
+                    audio.pause();
+                    resetLastListenBtn();
+                }
             }
             else {
-                audio.pause();
+                audio.src = `${SERVER_URL}/static/charts/${onlineId}/preview.${this.getAttribute("audio-ext")}`;
+                audio.play();
+                audio.addEventListener("ended", () => resetListenBtn(listenBtn));
+                
+                resetLastListenBtn();
+                activateListenBtn(listenBtn);
+                
+                lastPlayingChartId = onlineId;
             }
-            
         });
         
         
-        const playBtn = elem("button", { parent: buttonsCont, text: "play" });
+        const playBtn = elem("button", { parent: buttonsCont, text: "play", cls: "play-btn" });
         playBtn.addEventListener("click", () => {
             window.open("chuuni://play/"  + this.getAttribute("online-id"))
         });
@@ -113,14 +121,13 @@ customElements.define("listing-error", ListingError);
         // update chart count display
         document.getElementById("chart-count").textContent = count + " total charts";
         
-        for (const [id, title, difficulty, bpm, preview_time, audio_ext, img_ext, credit_audio, credit_img, credit_chart] of visibleCharts) {
+        for (const [id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart] of visibleCharts) {
             elem("chart-card", {
                 attrs: [
                     ["online-id", id], 
                     ["title", title],
                     ["difficulty", difficulty],
                     ["bpm", bpm],
-                    ["preview-time", preview_time],
                     ["audio-ext", audio_ext],
                     ["img-ext", img_ext],
                     ["credit-audio", credit_audio],
