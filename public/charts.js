@@ -3,32 +3,88 @@ import { elem } from "./lib.js";
 const SERVER_URL = "http://localhost:5000";
 const CHARTS_PER_PAGE = 50;
 
+const audio = new Audio();
+let lastPlayingChartId = null;
+
+function resetCurrListenBtn() {
+    if (lastPlayingChartId) {
+        const currListenBtn = document.getElementById(lastPlayingChartId + "-listen-btn");
+        currListenBtn.classList.replace("listen-btn-playing", "listen-btn-paused");
+        currListenBtn.textContent = "listen";
+    }
+}
+
 class ChartCard extends HTMLElement {
     connectedCallback() {
-        elem("img", {
-            attrs: [
-                ["src", 
-                    this.hasAttribute("img-ext") ? 
-                        `${SERVER_URL}/static/${this.getAttribute("online-id")}/img.${this.getAttribute("img-ext")}`:
-                        "public/default-bg.png"
-                ]
-            ],
-            parent: this
+        const onlineId = this.getAttribute("online-id");
+        
+        const imgExt = this.getAttribute("img-ext");
+        const imgSrc = imgExt ? 
+                        `${SERVER_URL}/static/charts/${onlineId}/img.${imgExt}`:
+                        "public/default-bg.png";
+        
+        let diff = this.getAttribute("difficulty");
+        if (diff.length > 5) {
+            diff = diff.substring(0, 4) + "."
+        }
+        
+        const creditAudio = this.getAttribute("credit-audio");
+        const creditImg = this.getAttribute("credit-img");
+        const creditChart = this.getAttribute("credit-chart");
+        
+        this.innerHTML = `
+            <div class="entry-diamond">
+                <div class="entry-img-cont">
+                    <img src="${imgSrc}" />
+                </div>
+                <div class="entry-difficulty-cont">
+                    <p>${diff}</p>
+                </div>
+            </div>
+
+            <div class="entry-content">
+                <header>
+                    <h2>${this.getAttribute("title")}</h2>
+                    <div class="entry-credits">
+                        ${creditAudio ? `<span class="credit-audio">${creditAudio}</span>` : ""}
+                        ${creditImg ? `<span class="credit-img">${creditImg}</span>` : ""}
+                        ${creditChart ? `<span class="credit-chart">${creditChart}</span>` : ""}
+                    </div>
+                </header>
+
+                <div class="entry-content-btns"></div>
+            </div>
+        `;
+        
+        const buttonsCont = this.querySelector(".entry-content-btns");
+        
+        const listenBtn = elem("button", { parent: buttonsCont, text: "listen", cls: "listen-btn-paused", id: onlineId + "-listen-btn" });
+        listenBtn.addEventListener("click", () => {
+            resetCurrListenBtn();
+            
+            if (audio.paused) {
+                listenBtn.classList.replace("listen-btn-paused", "listen-btn-playing");
+                listenBtn.textContent = "pause";
+                
+                if (lastPlayingChartId != onlineId) {
+                    audio.src = `${SERVER_URL}/static/charts/${onlineId}/audio.${this.getAttribute("audio-ext")}`;
+                    lastPlayingChartId = onlineId;
+                }
+                
+                audio.play();
+            }
+            else {
+                audio.pause();
+            }
+            
         });
         
-        elem("h3", { text: this.getAttribute("title"), parent: this });
         
-        elem("p", {
-            text: this.getAttribute("credit-audio"), 
-            parent: this
+        const playBtn = elem("button", { parent: buttonsCont, text: "play" });
+        playBtn.addEventListener("click", () => {
+            window.open("chuuni://play/"  + this.getAttribute("online-id"))
         });
         
-        elem("a", {
-            text: "play", 
-            cls: "play-button",
-            attrs: [["href", "chuuni://play/" + this.getAttribute("online-id")]],
-            parent: this,
-        });
     }
 }
 customElements.define("chart-card", ChartCard);
@@ -57,14 +113,14 @@ customElements.define("listing-error", ListingError);
         // update chart count display
         document.getElementById("chart-count").textContent = count + " total charts";
         
-        for (const [id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart] of visibleCharts) {
-            console.log([id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart]);
+        for (const [id, title, difficulty, bpm, preview_time, audio_ext, img_ext, credit_audio, credit_img, credit_chart] of visibleCharts) {
             elem("chart-card", {
                 attrs: [
                     ["online-id", id], 
                     ["title", title],
                     ["difficulty", difficulty],
                     ["bpm", bpm],
+                    ["preview-time", preview_time],
                     ["audio-ext", audio_ext],
                     ["img-ext", img_ext],
                     ["credit-audio", credit_audio],

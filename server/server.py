@@ -94,7 +94,7 @@ def get_charts(page: int):
         count = cursor.execute("SELECT COUNT(*) FROM charts").fetchone()[0]
         
         charts = cursor.execute(
-            "SELECT id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart FROM charts LIMIT ? OFFSET ?", 
+            "SELECT id, title, difficulty, bpm, preview_time, audio_ext, img_ext, credit_audio, credit_img, credit_chart FROM charts LIMIT ? OFFSET ?", 
             (PAGE_SIZE, PAGE_SIZE * page)
         ).fetchall()
         
