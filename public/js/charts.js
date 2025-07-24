@@ -26,7 +26,7 @@ class ChartCard extends HTMLElement {
         const imgExt = this.getAttribute("img-ext");
         const imgSrc = imgExt ? 
                         `${SERVER_URL}/static/charts/${onlineId}/img.${imgExt}`:
-                        "public/default-bg.png";
+                        "public/img/default-bg.png";
         
         let diff = this.getAttribute("difficulty");
         if (diff.length > 5) {
