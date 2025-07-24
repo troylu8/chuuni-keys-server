@@ -51,9 +51,9 @@ class ChartCard extends HTMLElement {
                 <header>
                     <h2>${this.getAttribute("title")}</h2>
                     <div class="entry-credits">
-                        ${creditAudio ? `<span class="credit-audio">${creditAudio}</span>` : ""}
-                        ${creditImg ? `<span class="credit-img">${creditImg}</span>` : ""}
-                        ${creditChart ? `<span class="credit-chart">${creditChart}</span>` : ""}
+                        ${creditAudio ? `<span class="credit-audio icon-before">${creditAudio}</span>` : ""}
+                        ${creditImg ? `<span class="credit-img icon-before">${creditImg}</span>` : ""}
+                        ${creditChart ? `<span class="credit-chart icon-before">${creditChart}</span>` : ""}
                     </div>
                 </header>
 
@@ -63,7 +63,12 @@ class ChartCard extends HTMLElement {
         
         const buttonsCont = this.querySelector(".entry-content-btns");
         
-        const listenBtn = elem("button", { parent: buttonsCont, text: "listen", cls: "listen-btn-paused", id: onlineId + "-listen-btn" });
+        const listenBtn = elem("button", { 
+            id: onlineId + "-listen-btn",
+            cls: "listen-btn-paused icon-before-sm", 
+            text: "listen", 
+            parent: buttonsCont, 
+        });
         listenBtn.addEventListener("click", () => {
             if (lastPlayingChartId == onlineId) {
                 if (audio.paused) {
@@ -88,7 +93,11 @@ class ChartCard extends HTMLElement {
         });
         
         
-        const playBtn = elem("button", { parent: buttonsCont, text: "play", cls: "play-btn" });
+        const playBtn = elem("button", { 
+            cls: "play-btn icon-before-sm",
+            text: "play", 
+            parent: buttonsCont, 
+        });
         playBtn.addEventListener("click", () => {
             window.open("chuuni://play/"  + this.getAttribute("online-id"))
         });
@@ -107,19 +116,55 @@ customElements.define("listing-error", ListingError);
 
 
 
-(async () => {
-    
-    const chartsList = document.querySelector("#charts-list");
+const chartsList = document.querySelector("#charts-list");
+const loadingSpinner = document.getElementById("loading-spinner");
+const chartCountElem = document.getElementById("chart-count");
+
+const prevBtn = document.getElementById("page-prev");
+const nextBtn = document.getElementById("page-next");
+
+
+
+
+const params = new URLSearchParams(document.location.search);
+const currPage = Number(params.get("page") ?? 1);
+const urlWithoutParams = window.location.origin + window.location.pathname;
+
+const currPageElem = document.getElementById("curr-page");
+currPageElem.textContent = currPage + " of ?";
+
+if (currPage <= 1) 
+    prevBtn.classList.add("disabled-link");
+else 
+    prevBtn.setAttribute("href", urlWithoutParams + "?page=" + Math.max(1, currPage - 1));
+
+// by default, cannot advance to next page
+nextBtn.classList.add("disabled-link");
+
+
+async function loadChartsPage(page) {
+    loadingSpinner.style.display = "block";
+    chartsList.innerHTML = "";
     
     try {
-        const chartsResp = await fetch(SERVER_URL + "/charts/0");
+        const chartsResp = await fetch(SERVER_URL + "/charts/" + page);
         if (!chartsResp.ok) 
             throw new Error(`[${chartsResp.status}] - ${chartsResp.statusText}`);
         
-        const [count, visibleCharts] = await chartsResp.json();
+        const [totalCharts, visibleCharts] = await chartsResp.json();
+        const lastPage = Math.ceil(totalCharts / CHARTS_PER_PAGE);
         
         // update chart count display
-        document.getElementById("chart-count").textContent = count + " total charts";
+        chartCountElem.textContent = totalCharts + " total charts";
+        
+        // enable next button if this isn't the last page
+        if (currPage < lastPage) {
+            nextBtn.classList.remove("disabled-link");
+            nextBtn.setAttribute("href", urlWithoutParams + "?page=" + (currPage + 1));
+        }
+        
+        // update current page display
+        currPageElem.textContent = currPage + " / " + lastPage;
         
         for (const [id, title, difficulty, bpm, audio_ext, img_ext, credit_audio, credit_img, credit_chart] of visibleCharts) {
             elem("chart-card", {
@@ -145,6 +190,7 @@ customElements.define("listing-error", ListingError);
         })
     }
     
-    document.getElementById("loading-spinner").remove();
-    
-})();
+    loadingSpinner.style.display = "none";
+}
+
+loadChartsPage(currPage);

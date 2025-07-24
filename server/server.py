@@ -91,6 +91,9 @@ PAGE_SIZE = 50
 
 @app.get("/charts/<int:page>")
 def get_charts(page: int):
+    # page is 1-indexed
+    page -= 1
+    
     with sqlite3.connect("chuuni.db") as conn:
         cursor = conn.cursor()
         
