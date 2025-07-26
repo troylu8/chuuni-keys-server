@@ -2,7 +2,6 @@ FROM python:3.13.5-alpine
 
 WORKDIR /app
 
-RUN mkdir -p /app/static/charts/
 COPY requirements.txt .
 COPY main.py .
 
