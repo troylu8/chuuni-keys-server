@@ -1,6 +1,7 @@
 import { elem } from "./lib.js";
 
-const SERVER_URL = "http://localhost:5000";
+const SERVER_URL = "https://api-chuuni-keys.troylu.com";
+// const SERVER_URL = "http://localhost:5000";
 const CHARTS_PER_PAGE = 50;
 
 const audio = new Audio();

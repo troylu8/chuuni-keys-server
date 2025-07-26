@@ -5,6 +5,7 @@ services:
       - "44777:44777"
     volumes: 
       - "chuuni_volume:/chuuni_volume"
+    restart: always
 
 volumes:
   chuuni_volume:
