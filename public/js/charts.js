@@ -42,7 +42,7 @@ class ChartCard extends HTMLElement {
                 <div class="entry-img-cont">
                     <img src="${imgSrc}" />
                 </div>
-                <div class="entry-difficulty-cont">
+                <div class="entry-difficulty-cont" style="background-color: var(--${this.getAttribute("difficulty")})">
                     <p>${diff}</p>
                 </div>
             </div>

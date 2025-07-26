@@ -10,9 +10,18 @@ import os
 import shutil
 
 
+APP_DIR = os.path.dirname(__file__)
+
 app = Flask(__name__)
 CORS(app, origins="*")
 
+
+def chuuni_db_conn():
+    return sqlite3.connect(APP_DIR + "/chuuni.db")
+
+# initialize chuuni.db
+with chuuni_db_conn() as conn:
+    conn.cursor().execute("CREATE TABLE IF NOT EXISTS `charts` (`id` TEXT PRIMARY KEY UNIQUE NOT NULL, `owner_hash` TEXT NOT NULL, `title` TEXT NOT NULL, `difficulty` TEXT NOT NULL, `bpm` NUMERIC NOT NULL, `first_beat` NUMERIC NOT NULL, `preview_time` NUMERIC NOT NULL, `measure_size` INTEGER NOT NULL, `snaps` INTEGER NOT NULL, `audio_ext` TEXT NOT NULL, `img_ext` TEXT, `credit_audio` TEXT, `credit_img` TEXT, `credit_chart` TEXT)")
 
 def gen_id():
     symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
@@ -70,7 +79,7 @@ VALID_AUDIO_EXTS = "mp3", "wav", "aac", "ogg", "webm"
 VALID_IMG_EXTS = "png", "jpg", "bmp", "webp", "avif", "jpeg"
 
 def save_uploaded_files(id: str, metadata: dict[str, str]):
-    chart_folder = f"static/charts/{id}"
+    chart_folder = APP_DIR + "/static/charts/" + id
     os.makedirs(chart_folder, exist_ok=True)
     
     if "chart" in request.files:
@@ -94,7 +103,7 @@ def get_charts(page: int):
     # page is 1-indexed
     page -= 1
     
-    with sqlite3.connect("chuuni.db") as conn:
+    with chuuni_db_conn() as conn:
         cursor = conn.cursor()
         
         count = cursor.execute("SELECT COUNT(*) FROM charts").fetchone()[0]
@@ -118,7 +127,7 @@ def upload_chart():
     
     # insert sqlite3 row
     placeholder, row_data = create_db_row(online_id, metadata, owner_hash)
-    with sqlite3.connect("chuuni.db") as conn:
+    with chuuni_db_conn() as conn:
         conn.cursor().execute(f"INSERT INTO charts VALUES ({placeholder})", row_data)
     
     return online_id
@@ -126,10 +135,10 @@ def upload_chart():
 
 @app.patch("/charts/<id>")
 def update_chart(id: str):
-    owner_key = request.form["owner_key"].encode();
+    owner_key = request.form["owner_key"].encode()
     
     # update sqlite3 row
-    with sqlite3.connect("chuuni.db") as conn:
+    with chuuni_db_conn() as conn:
         cursor = conn.cursor()
         
         old_data = cursor.execute("SELECT img_ext, owner_hash FROM charts WHERE id=?", (id,)).fetchone()
@@ -149,7 +158,7 @@ def update_chart(id: str):
     
     # delete old image if it wasnt overwritten
     if old_img_ext is not None and old_img_ext != metadata.get("img_ext"):
-        os.remove(f"static/charts/{id}/img.{old_img_ext}")
+        os.remove(f"{APP_DIR}/static/charts/{id}/img.{old_img_ext}")
     
     return Response(status=200)
 
@@ -159,7 +168,7 @@ def delete_chart(id: str):
     owner_key = request.data
     
     # delete sqlite3 row
-    with sqlite3.connect("chuuni.db") as conn:
+    with chuuni_db_conn() as conn:
         cursor = conn.cursor()
         
         row = cursor.execute("SELECT owner_hash FROM charts WHERE id=?", (id,)).fetchone()
@@ -172,7 +181,7 @@ def delete_chart(id: str):
             return Response(status=401)
     
     # delete chart folder
-    shutil.rmtree(f"static/charts/{id}")
+    shutil.rmtree(f"{APP_DIR}/static/charts/{id}")
     
     return Response(status=200)
 
@@ -180,7 +189,7 @@ def delete_chart(id: str):
 def download_chart(id: str):
     
     # get metadata from sqlite3 row
-    with sqlite3.connect("chuuni.db") as conn:
+    with chuuni_db_conn() as conn:
         conn.row_factory = sqlite3.Row
         
         row = conn.cursor().execute("SELECT * FROM charts WHERE id=?", (id,)).fetchone()
@@ -189,7 +198,7 @@ def download_chart(id: str):
     
     # zip chart folder
     zip_buffer = io.BytesIO()
-    chart_folder = f"static/charts/{id}"
+    chart_folder = f"{APP_DIR}/static/charts/{id}"
     with ZipFile(zip_buffer, mode="w") as zip:
         zip.writestr("metadata.json", json.dumps(to_metadata(row)))
         zip.write(f"{chart_folder}/chart.txt", "chart.txt")
