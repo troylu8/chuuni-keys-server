@@ -1,0 +1,10 @@
+services:
+  main:
+    build: .
+    ports: 
+      - "44777:44777"
+    volumes: 
+      - "chuuni_volume:/chuuni_volume"
+
+volumes:
+  chuuni_volume:

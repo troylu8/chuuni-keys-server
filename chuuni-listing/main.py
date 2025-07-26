@@ -10,14 +10,12 @@ import os
 import shutil
 
 
-APP_DIR = os.path.dirname(__file__)
-
-app = Flask(__name__)
+app = Flask(__name__, static_folder="/chuuni_volume/static")
 CORS(app, origins="*")
 
 
 def chuuni_db_conn():
-    return sqlite3.connect(APP_DIR + "/chuuni.db")
+    return sqlite3.connect("/chuuni_volume/chuuni.db")
 
 # initialize chuuni.db
 with chuuni_db_conn() as conn:
@@ -79,7 +77,7 @@ VALID_AUDIO_EXTS = "mp3", "wav", "aac", "ogg", "webm"
 VALID_IMG_EXTS = "png", "jpg", "bmp", "webp", "avif", "jpeg"
 
 def save_uploaded_files(id: str, metadata: dict[str, str]):
-    chart_folder = APP_DIR + "/static/charts/" + id
+    chart_folder = "/chuuni_volume/static/charts/" + id
     os.makedirs(chart_folder, exist_ok=True)
     
     if "chart" in request.files:
@@ -158,7 +156,7 @@ def update_chart(id: str):
     
     # delete old image if it wasnt overwritten
     if old_img_ext is not None and old_img_ext != metadata.get("img_ext"):
-        os.remove(f"{APP_DIR}/static/charts/{id}/img.{old_img_ext}")
+        os.remove(f"/chuuni_volume/static/charts/{id}/img.{old_img_ext}")
     
     return Response(status=200)
 
@@ -181,7 +179,7 @@ def delete_chart(id: str):
             return Response(status=401)
     
     # delete chart folder
-    shutil.rmtree(f"{APP_DIR}/static/charts/{id}")
+    shutil.rmtree(f"/chuuni_volume/static/charts/{id}")
     
     return Response(status=200)
 
@@ -198,7 +196,7 @@ def download_chart(id: str):
     
     # zip chart folder
     zip_buffer = io.BytesIO()
-    chart_folder = f"{APP_DIR}/static/charts/{id}"
+    chart_folder = f"/chuuni_volume/static/charts/{id}"
     with ZipFile(zip_buffer, mode="w") as zip:
         zip.writestr("metadata.json", json.dumps(to_metadata(row)))
         zip.write(f"{chart_folder}/chart.txt", "chart.txt")
