@@ -2,9 +2,12 @@
 
 <html>
     <head>
-        <link rel="stylesheet" href="public/styles.css" />
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
-        <script defer src="public/js/download.js"></script>
+        <link rel="stylesheet" href="public/css/global.css" />
+        <link rel="stylesheet" href="public/css/index.css" />
+        <script defer src="public/js/index.js"></script>
+
+        <title>chuuni keys</title>
     </head>
 
     <body>
@@ -17,12 +20,24 @@
             <div id="logo-cont">
                 <img src="public/img/logo.png" alt="chuuni keys logo" width="100%" />
             </div>
-            <p id="splash-text">keyboard rhythm game</p>
+            <p id="splash-text">Keyboard based rhythm game.</p>
 
             <h2 id="download-header">Download:</h2>
             <div id="download-btns-cont">
                 <button id="download-windows" class="download-btn icon-before">Windows</button>
                 <a id="gh-link" class="icon-before" href="https://github.com/troylu8/chuuni-keys" target="_blank"> Source code </a>
+            </div>
+
+            <div id="showcase-cont">
+                <div class="showcase-item">
+                    <span>Tap your keyboard to the beat!</span>
+                    <video id="showcase-gameplay-video" src="public/showcase/gameplay.mp4" loop>Gameplay showcase could not be played</video>
+                    <button id="watch-btn" class="icon-before with-play-icon">watch gameplay</button>
+                    <div id="showcase-gameplay-credits">
+                        <span> <strong>song</strong> &nbsp; A.SAKA </span>
+                        <span> <strong>art</strong> &nbsp; 犀将(Saisho) </span>
+                    </div>
+                </div>
             </div>
         </main>
     </body>
