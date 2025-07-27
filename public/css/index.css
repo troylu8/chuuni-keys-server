@@ -1,3 +1,12 @@
+button {
+    color: var(--base);
+    font-size: large;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
 #splash-text {
     font-family: "EB Garamond", serif;
     font-size: 28px;
@@ -18,15 +27,6 @@
     display: flex;
     align-items: baseline;
     gap: 24px;
-}
-
-.download-btn {
-    color: var(--base);
-    font-size: large;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-family: monospace;
 }
 
 #download-windows {
@@ -120,4 +120,15 @@
     100% {
         outline: solid 8px #00000000;
     }
+}
+
+#chuunibyou-definition {
+    margin-top: 128px;
+    line-height: 1.5em;
+    opacity: 0.8;
+}
+#chuunibyou-definition > strong {
+    color: var(--yellow);
+    font-family: monospace;
+    font-size: x-large;
 }

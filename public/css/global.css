@@ -81,7 +81,7 @@ main {
 #top-nav {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 24px;
     margin: 8px;
 }
 
@@ -89,6 +89,7 @@ main {
     color: var(--mauve);
     cursor: pointer;
     font-family: monospace;
+    font-size: large;
 }
 
 #top-nav > a:hover {
