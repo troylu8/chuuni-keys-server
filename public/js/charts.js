@@ -46,11 +46,13 @@ const audio = new Audio();
 let lastPlayingChartId = null;
 
 function activateListenBtn(btn) {
-    btn.classList.replace("listen-btn-paused", "listen-btn-playing");
+    btn.classList.replace("with-play-icon", "with-pause-icon");
+    btn.style.color = "var(--red)";
     btn.textContent = "pause";
 }
 function resetListenBtn(btn) {
-    btn.classList.replace("listen-btn-playing", "listen-btn-paused");
+    btn.classList.replace("with-pause-icon", "with-play-icon");
+    btn.style.color = "";
     btn.textContent = "listen";
 }
 function resetLastListenBtn() {
@@ -104,7 +106,7 @@ class ChartCard extends HTMLElement {
         
         const listenBtn = elem("button", { 
             id: onlineId + "-listen-btn",
-            cls: "listen-btn-paused icon-before-sm", 
+            cls: "icon-before-sm with-play-icon",
             text: "listen", 
             parent: buttonsCont, 
         });

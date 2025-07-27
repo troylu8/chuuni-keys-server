@@ -4,7 +4,8 @@
     box-sizing: border-box;
 }
 :root {
-    /* catppuccin mocha */
+    /* color scheme: catppuccin mocha */
+    --crust: #11111b;
     --base: #1e1e2e;
     --text: #cdd6f4;
     --mauve: #cba6f7;

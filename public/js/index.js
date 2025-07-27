@@ -2,6 +2,7 @@ const gameplayVideo = document.getElementById("showcase-gameplay-video");
 const watchBtn = document.getElementById("watch-btn");
 
 watchBtn.addEventListener("click", () => {
+    watchBtn.style.animation = "none";
     if (gameplayVideo.paused) {
         gameplayVideo.play();
         watchBtn.style.color = "var(--red)";

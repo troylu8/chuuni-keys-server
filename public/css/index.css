@@ -46,28 +46,45 @@
 
 #showcase-cont {
     margin-top: 64px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+}
+.showcase-item {
     position: relative;
 }
 
-.showcase-item > span {
+.showcase-item > h2 {
     position: absolute;
     top: 32px;
     left: 0;
 
-    background-color: var(--mauve);
-    color: var(--base);
+    padding: 8px 6px 8px 6px;
+    background-color: var(--text);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+.showcase-item > h2 > span {
+    content: "";
+
+    background-color: var(--base);
+    color: var(--text);
 
     padding: 4px 32px 4px 24px;
     font-size: larger;
+
     clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 
     font-weight: bold;
 }
-.showcase-item > video {
+
+.showcase-item > video,
+.showcase-item > img {
+    margin-top: 12px;
     width: 100%;
 }
 
-#showcase-gameplay-credits {
+.showcase-info {
     position: absolute;
     top: 100%;
     right: 0;
@@ -81,7 +98,7 @@
     bottom: 32px;
     left: 32px;
 
-    font-size: larger;
+    font-size: x-large;
 
     color: var(--mauve);
     border: solid 2px;
@@ -90,4 +107,17 @@
     padding: 2px 8px;
     font-family: monospace;
     margin-right: auto;
+
+    animation: watch-btn-anim 1s ease-out infinite forwards;
+}
+@keyframes watch-btn-anim {
+    0% {
+        outline: solid 0px;
+    }
+    50% {
+        outline: solid 8px #00000000;
+    }
+    100% {
+        outline: solid 8px #00000000;
+    }
 }
