@@ -60,6 +60,20 @@ function resetLastListenBtn() {
         resetListenBtn(document.getElementById(lastPlayingChartId + "-listen-btn"));
 }
 
+/**
+ * @param {string} text
+ * @param {HTMLElement} parent
+ * @param {string} [cls]
+ */
+function addHTMLEscapedText(text, parent, cls) {
+    if (cls) {
+        const span = elem("span", { cls, parent });
+        span.appendChild(document.createTextNode(text));
+    }
+    else 
+        parent.appendChild(document.createTextNode(text));
+}
+
 class ChartCard extends HTMLElement {
     connectedCallback() {
         const onlineId = this.getAttribute("online-id");
@@ -69,38 +83,48 @@ class ChartCard extends HTMLElement {
                         `${SERVER_URL}/static/charts/${onlineId}/img.${imgExt}`:
                         "public/img/default-bg.png";
         
-        let diff = this.getAttribute("difficulty");
-        if (diff.length > 5) {
-            diff = diff.substring(0, 4) + "."
-        }
-        
-        const creditAudio = this.getAttribute("credit-audio");
-        const creditImg = this.getAttribute("credit-img");
-        const creditChart = this.getAttribute("credit-chart");
-        
         this.innerHTML = `
             <div class="entry-diamond">
                 <div class="entry-img-cont">
                     <img src="${imgSrc}" />
                 </div>
                 <div class="entry-difficulty-cont" style="background-color: var(--${this.getAttribute("difficulty")})">
-                    <p>${diff}</p>
+                    <p class="entry-difficulty"></p>
                 </div>
             </div>
 
             <div class="entry-content">
                 <header>
-                    <h2>${this.getAttribute("title")}</h2>
-                    <div class="entry-credits">
-                        ${creditAudio ? `<span class="credit-audio icon-before">${creditAudio}</span>` : ""}
-                        ${creditImg ? `<span class="credit-img icon-before">${creditImg}</span>` : ""}
-                        ${creditChart ? `<span class="credit-chart icon-before">${creditChart}</span>` : ""}
-                    </div>
+                    <h2 class="entry-title"></h2>
+                    <div class="entry-credits"></div>
                 </header>
 
                 <div class="entry-content-btns"></div>
             </div>
         `;
+        
+        // insert difficulty text
+        const diff = this.getAttribute("difficulty");
+        addHTMLEscapedText(
+            diff.length > 5 ? diff.substring(0, 4) + "." : diff,
+            this.querySelector(".entry-difficulty")
+        );
+        
+        // insert title text
+        addHTMLEscapedText(this.getAttribute("title"), this.querySelector(".entry-title"));
+        
+        // insert credit text
+        const creditsElem = this.querySelector(".entry-credits");
+        const creditAudio = this.getAttribute("credit-audio");
+        const creditImg = this.getAttribute("credit-img");
+        const creditChart = this.getAttribute("credit-chart");
+        if (creditAudio) 
+            addHTMLEscapedText(creditAudio, creditsElem, "credit-audio icon-before");
+        if (creditImg) 
+            addHTMLEscapedText(creditImg, creditsElem, "credit-img icon-before");
+        if (creditChart) 
+            addHTMLEscapedText(creditChart, creditsElem, "credit-chart icon-before");
+        
         
         const buttonsCont = this.querySelector(".entry-content-btns");
         
@@ -163,8 +187,6 @@ const chartCountElem = document.getElementById("chart-count");
 
 const prevBtn = document.getElementById("page-prev");
 const nextBtn = document.getElementById("page-next");
-
-
 
 
 const params = new URLSearchParams(document.location.search);
