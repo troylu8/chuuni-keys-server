@@ -2,6 +2,8 @@
     <img src="public/img/logo.png" alt="chuuni keys logo" width="700">
 </p>
 
+**chuuni keys** is a keyboard based rhythm game. View the repository [here](https://github.com/troylu8/chuuni-keys).
+
 Both the [chuuni keys website](https://chuuni-keys.troylu.com/) and the **chart listing api server** are contained in this repository.
 
 ## The chart listing
