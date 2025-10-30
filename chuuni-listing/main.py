@@ -24,6 +24,15 @@ with chuuni_db_conn() as conn:
 def gen_id():
     symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
     return "".join([random.choice(symbols) for _ in range(10)])
+    
+def is_valid_id(id: str):
+    symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+    
+    for ch in id:
+        if ch not in symbols:
+            return False
+        
+    return len(id) == 10
 
 
 def create_db_row(id: str, metadata: dict, owner_hash: str):
@@ -133,6 +142,9 @@ def upload_chart():
 
 @app.patch("/charts/<id>")
 def update_chart(id: str):
+    if not is_valid_id(id):
+        return Response(status=403)
+    
     owner_key = request.form["owner_key"].encode()
     
     # update sqlite3 row
@@ -163,6 +175,9 @@ def update_chart(id: str):
 
 @app.delete("/charts/<id>")
 def delete_chart(id: str):
+    if not is_valid_id(id):
+        return Response(status=403)
+    
     owner_key = request.data
     
     # delete sqlite3 row
@@ -185,6 +200,8 @@ def delete_chart(id: str):
 
 @app.get("/charts/download/<id>")
 def download_chart(id: str):
+    if not is_valid_id(id):
+        return Response(status=403)
     
     # get metadata from sqlite3 row
     with chuuni_db_conn() as conn:
